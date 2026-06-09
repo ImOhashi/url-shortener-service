@@ -4,8 +4,11 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/imohashi/url-shortener-service/docs"
 	"github.com/imohashi/url-shortener-service/internal/infra/logger"
 	"github.com/joho/godotenv"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 const (
@@ -13,6 +16,11 @@ const (
 	defaultPort   = "8080"
 )
 
+// @title URL Shortener Service API
+// @version 1.0
+// @description API for shortening URLs.
+// @host localhost:8000
+// @BasePath /
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 	gin.ForceConsoleColor()
@@ -28,9 +36,18 @@ func main() {
 
 	logger.Info("Server listening on port: " + port)
 
-	if err := gin.Default().Run(":" + port); err != nil {
+	configureSwagger(router, port)
+
+	if err := router.Run(":" + port); err != nil {
 		logger.Error(err.Error())
 	}
+}
+
+func configureSwagger(router *gin.Engine, port string) {
+	docs.SwaggerInfo.BasePath = "/"
+	docs.SwaggerInfo.Host = "localhost:" + port
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
 
 func getServerPort() string {
