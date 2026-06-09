@@ -16,6 +16,11 @@ const (
 	defaultPort   = "8080"
 )
 
+var (
+	setTrustedProxies = (*gin.Engine).SetTrustedProxies
+	runRouter         = (*gin.Engine).Run
+)
+
 // @title URL Shortener Service API
 // @version 1.0
 // @description API for shortening URLs.
@@ -28,7 +33,7 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Logger(), gin.Recovery())
 
-	if err := router.SetTrustedProxies(nil); err != nil {
+	if err := setTrustedProxies(router, nil); err != nil {
 		logger.Error(err.Error())
 	}
 
@@ -38,7 +43,7 @@ func main() {
 
 	configureSwagger(router, port)
 
-	if err := router.Run(":" + port); err != nil {
+	if err := runRouter(router, ":"+port); err != nil {
 		logger.Error(err.Error())
 	}
 }
